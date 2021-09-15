@@ -20,4 +20,9 @@ class RecordPolicy
     {
         return ($user->id === $record->user_id) || ($user->id === $record->user->manager_id);
     }
+
+    public function create(User $user)
+    {
+        return !$user->is_manager;
+    }
 }

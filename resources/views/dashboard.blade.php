@@ -19,13 +19,16 @@
             <tbody>
                 @foreach($records as $record)
                     <tr>
-                        <td>{{ $record->title }}</td>
+                        <td><a href="{{route('records.show', $record->id)}}">{{ $record->title }}</a></td>
+
                         <td>{{ $record->user->name }}</td>
-                        <td style="text-align: center;"><img src="{{'images/' . $record->image->url}}" width="100" height="60"></td>
+                        <td style="text-align: center;"><img src="{{url('images/' . $record->image->url)}}" width="100" height="60"></td>
                         <td style="width: auto">
                             <div class="row ml-3">
-                            <a href="{{ route('edit', $record->id) }}"> <button class="edit" title="Edit" data-toggle="tooltip"><i class="material-icons">&#xE254;</i></button></a>
-                            <form method="POST" action="{{route('destroy', $record->id)}}">
+                            @can('update', $record)
+                            <a href="{{ route('records.edit', $record->id) }}"> <button class="edit" title="Edit" data-toggle="tooltip"><i class="material-icons">&#xE254;</i></button></a>
+                            @endcan
+                            <form method="POST" action="{{route('records.destroy', $record->id)}}">
                                 @csrf
                                 @method('DELETE')
                                 <button class="delete" type="submit" title="Delete" data-toggle="tooltip" ><i class="material-icons">&#xE872;</i></button>

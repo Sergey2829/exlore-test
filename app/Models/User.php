@@ -2,7 +2,6 @@
 
 namespace App\Models;
 
-use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
@@ -56,5 +55,16 @@ class User extends Authenticatable
     public function getIsManagerAttribute()
     {
         return $this->role->title === Role::MANGER;
+    }
+
+    protected static function boot()
+    {
+        parent::boot();
+
+        if(auth()->check() && auth()->user()->is_manager) {
+            self::creating(function($user) {
+                $user->manager_id = auth()->id();
+            });
+        }
     }
 }

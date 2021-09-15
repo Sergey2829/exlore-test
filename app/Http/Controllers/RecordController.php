@@ -2,8 +2,12 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Requests\CreateRecord;
 use App\Http\Services\RecordService;
+use App\Models\Category;
 use App\Models\Record;
+use App\Models\User;
+use App\Providers\RouteServiceProvider;
 use Illuminate\Http\Request;
 
 
@@ -26,36 +30,31 @@ class RecordController extends Controller
         return view('dashboard', compact('records'));
     }
 
-    /**
-     * Show the form for creating a new resource.
-     *
-     * @return \Illuminate\Http\Response
-     */
+
     public function create()
     {
-        //
+        if (!$this->checkAccess('create', Record::class)) {
+            return redirect()->back();
+        }
+
+        $categories = Category::all();
+        return view('record.create', compact('categories'));
     }
 
-    /**
-     * Store a newly created resource in storage.
-     *
-     * @param  \Illuminate\Http\Request  $request
-     * @return \Illuminate\Http\Response
-     */
-    public function store(Request $request)
+
+    public function store(CreateRecord $request)
     {
-        //
+        $this->service->storeRecord($request);
+
+        return redirect()->to(RouteServiceProvider::HOME)
+            ->with('success', 'record has been created');
+
     }
 
-    /**
-     * Display the specified resource.
-     *
-     * @param  \App\Models\Record  $record
-     * @return \Illuminate\Http\Response
-     */
+
     public function show(Record $record)
     {
-        //
+        return view('record.show', compact('record'));
     }
 
     /**
@@ -66,10 +65,10 @@ class RecordController extends Controller
      */
     public function edit(Record $record)
     {
-
-        if (!$this->checkAccess('edit', $record)) {
+        if (!$this->checkAccess('update', $record)) {
             return redirect()->back();
         }
+        dd('you can edit');
     }
 
     /**
@@ -94,4 +93,18 @@ class RecordController extends Controller
         $record->delete();
         return redirect()->back()->with('success', 'record has been deleted');
     }
+
+    public function getByCategory($categoryId)
+    {
+        $category = Category::find($categoryId);
+        $records = $this->service->getRecordsByCategory($categoryId);
+        return view('dashboard', compact('records', 'category'));
+    }
+
+    public function getByUser(User $user)
+    {
+        $records = $this->service->getRecordsByUser($user->id);
+        return view('dashboard', compact('records'));
+    }
+
 }
